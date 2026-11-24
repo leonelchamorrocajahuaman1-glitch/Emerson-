@@ -29,8 +29,8 @@ if (next) {
 qsa('[data-demo]').forEach((btn) =>
   btn.addEventListener('click', () => {
     const demo = {
-      admin: ['admin@pololab.pe', 'admin123'],
-      cliente: ['cliente@pololab.pe', 'cliente123'],
+      admin: ['admin@emroriginal.pe', 'admin123'],
+      cliente: ['cliente@emroriginal.pe', 'cliente123'],
     }[btn.dataset.demo];
     form.elements.email.value = demo[0];
     form.elements.password.value = demo[1];

@@ -2,6 +2,7 @@
 # Render la lee al crear un "Blueprint" desde este repositorio. Guía paso a paso: docs/PUBLICAR.md
 services:
   - type: web
+    # Nombre del servicio ya publicado en Render: no lo cambies o se creará otro servicio.
     name: pololab
     runtime: node
     plan: free

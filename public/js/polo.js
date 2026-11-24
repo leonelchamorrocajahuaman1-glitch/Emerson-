@@ -6,10 +6,10 @@ const esc = (value) => String(value ?? '').replace(/[&<>"']/g, (c) => ESCAPES[c]
 
 export const PRINTS = {
   ninguno: 'Sin estampado',
-  logo: 'Logo POLOLAB',
-  lima26: 'Lima 26 college',
-  atardecer: 'Atardecer neón',
-  ola: 'Ola del Pacífico',
+  logo: 'Logo EMR ORIGINAL',
+  lima26: 'Huánuco 26 college',
+  atardecer: 'Atardecer andino',
+  ola: 'Río Huallaga',
 };
 
 function luminance(hex) {
@@ -67,15 +67,15 @@ function printMarkup(print, { id, a, ink, base }) {
     case 'logo':
       return `<g transform="translate(200 150)">
         <path d="${MOUNTAIN}" fill="${a}"/>
-        <text y="66" text-anchor="middle" ${FONT} font-weight="800" font-size="36" letter-spacing="7" fill="${ink}">POLOLAB</text>
-        <text y="86" text-anchor="middle" ${FONT} font-weight="600" font-size="10.5" letter-spacing="5" fill="${a}">EST. 2026 · LIMA, PERÚ</text>
+        <text y="66" text-anchor="middle" ${FONT} font-weight="800" font-size="30" letter-spacing="3" fill="${ink}" textLength="172" lengthAdjust="spacingAndGlyphs">EMR ORIGINAL</text>
+        <text y="86" text-anchor="middle" ${FONT} font-weight="600" font-size="10" letter-spacing="2" fill="${a}" textLength="160" lengthAdjust="spacingAndGlyphs">EST. 2026 · HUÁNUCO, PERÚ</text>
       </g>`;
     case 'lima26':
       return `<path id="${id}-arc" d="M118 172Q200 112 282 172" fill="none"/>
-        <text ${FONT} font-weight="800" font-size="54" letter-spacing="5" fill="${a}" stroke="${ink}" stroke-width="2.5" paint-order="stroke">
-          <textPath href="#${id}-arc" startOffset="50%" text-anchor="middle">LIMA</textPath></text>
+        <text ${FONT} font-weight="800" font-size="44" letter-spacing="3" fill="${a}" stroke="${ink}" stroke-width="2.5" paint-order="stroke">
+          <textPath href="#${id}-arc" startOffset="50%" text-anchor="middle">HUÁNUCO</textPath></text>
         <text x="200" y="262" text-anchor="middle" ${FONT} font-weight="800" font-size="96" fill="none" stroke="${a}" stroke-width="3.5">26</text>
-        <text x="200" y="284" text-anchor="middle" ${FONT} font-weight="600" font-size="10.5" letter-spacing="4" fill="${ink}">CIUDAD DE LOS REYES</text>`;
+        <text x="200" y="284" text-anchor="middle" ${FONT} font-weight="600" font-size="10.5" letter-spacing="2" fill="${ink}">EL MEJOR CLIMA DEL MUNDO</text>`;
     case 'atardecer':
       return `<linearGradient id="${id}-sun" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0" stop-color="#ffd23f"/><stop offset=".55" stop-color="${a}"/><stop offset="1" stop-color="${a}"/>
@@ -84,10 +84,10 @@ function printMarkup(print, { id, a, ink, base }) {
         <g clip-path="url(#${id}-sc)">
           <rect x="138" y="134" width="124" height="124" fill="url(#${id}-sun)"/>
           <path d="M138 204h124v3H138zM138 216h124v4H138zM138 228h124v5H138zM138 241h124v7H138z" fill="${base}"/>
-          <path d="M128 240V218h10v-8h8v14h10v-26h8v-8h6v8h8v14h12v-10h8v-22h6v22h8v6h10v-14h10v20h10v-12h10v16h10v-8h10v32z" fill="${base}"/>
+          <path d="M128 240l20-24 12 10 22-32 14 16 18-26 20 28 12-10 26 38z" fill="${base}"/>
         </g>
         <path d="M118 250H282M134 260H266M152 270H248" stroke="${a}" stroke-width="2.6" stroke-linecap="round"/>
-        <text x="200" y="300" text-anchor="middle" ${FONT} font-weight="800" font-size="24" letter-spacing="12" fill="${ink}">LIMA</text>`;
+        <text x="200" y="300" text-anchor="middle" ${FONT} font-weight="800" font-size="24" letter-spacing="8" fill="${ink}">HUÁNUCO</text>`;
     case 'ola':
       return `<path id="${id}-ring" d="M136 204a64 64 0 1 1 128 0a64 64 0 1 1-128 0" fill="none"/>
         <circle cx="200" cy="204" r="80" fill="none" stroke="${a}" stroke-width="3"/>
@@ -100,7 +100,7 @@ function printMarkup(print, { id, a, ink, base }) {
           <circle cx="222" cy="176" r="9" fill="${base}" stroke="none"/>
         </g>
         <text ${FONT} font-weight="700" font-size="14" letter-spacing="3.2" fill="${ink}">
-          <textPath href="#${id}-ring" startOffset="2%">PACÍFICO · LIMA · PERÚ · OLAS ·</textPath></text>`;
+          <textPath href="#${id}-ring" startOffset="2%">RÍO HUALLAGA · HUÁNUCO · PERÚ ·</textPath></text>`;
     default:
       return '';
   }
@@ -143,7 +143,7 @@ export function poloSVG({
   // Espalda: logo pequeño bajo el cuello y el nombre personalizado como en una camiseta de fútbol.
   const name = String(text || '').toUpperCase().slice(0, 12);
   const backArt = side === 'back'
-    ? `${design === 'franja' ? '' : `<text x="200" y="76" text-anchor="middle" ${FONT} font-weight="700" font-size="11" letter-spacing="4" fill="${ink}" opacity=".85">POLOLAB</text>`}
+    ? `${design === 'franja' ? '' : `<text x="200" y="76" text-anchor="middle" ${FONT} font-weight="700" font-size="11" letter-spacing="4" fill="${ink}" opacity=".85">EMR ORIGINAL</text>`}
        ${name ? `<text x="200" y="150" text-anchor="middle" ${FONT} font-weight="800" font-size="50" letter-spacing="3"
           fill="${design === 'franja' ? ink : a}" stroke="${c}" stroke-width="5" paint-order="stroke"
           ${name.length > 7 ? 'textLength="196" lengthAdjust="spacingAndGlyphs"' : ''}>${esc(name)}</text>` : ''}`
@@ -173,7 +173,7 @@ export function poloSVG({
        <path d="M150 38C172 26 228 26 250 38L242 41C224 33 176 33 158 41Z" fill="${c}"/>
        <path d="M150 38C172 26 228 26 250 38L242 41C224 33 176 33 158 41Z" fill="#000" opacity=".25"/>
        <rect x="187" y="41" width="26" height="14" rx="1.5" fill="#f1f1f1"/>
-       <text x="200" y="50.5" text-anchor="middle" ${FONT} font-weight="700" font-size="6" letter-spacing=".8" fill="#111">POLOLAB</text>`
+       <text x="200" y="50.5" text-anchor="middle" ${FONT} font-weight="700" font-size="7" letter-spacing="1" fill="#111">EMR</text>`
     : '';
 
   const lighting = flat

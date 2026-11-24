@@ -54,5 +54,5 @@ En la versión publicada **no** existen las cuentas de prueba (`admin123`, `clie
 - **Primera visita lenta:** en el plan gratis, si nadie entra durante 15 minutos Render apaga la página. La siguiente visita tarda cerca de un minuto en cargar; después va rápida. Tus datos no se pierden porque están en Turso.
 - **Actualizar la tienda:** cada vez que se suben cambios a la rama de GitHub, Render la vuelve a publicar sola.
 - **Cambiar tu contraseña:** en el panel → **Mi perfil**. La variable `ADMIN_PASSWORD` solo se usa la primera vez que se crea la tienda.
-- **Tu propio dominio** (por ejemplo `www.pololab.pe`): se compra aparte y se conecta en Render → tu servicio → **Settings** → **Custom Domains**.
+- **Tu propio dominio** (por ejemplo `www.emroriginal.pe`): se compra aparte y se conecta en Render → tu servicio → **Settings** → **Custom Domains**.
 - **Si algo falla:** en Render abre tu servicio → **Logs**. Si dice *"No se pudo abrir la base de datos"*, revisa que la URL y el token de Turso estén bien copiados (sin espacios al inicio o al final) en **Environment**.

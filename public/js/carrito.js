@@ -77,7 +77,7 @@ function checkoutHTML() {
     <h3 class="full" style="font-size: 20px; letter-spacing: .08em">Datos de envío</h3>
     <label class="field full"><span>Quién recibe</span><input type="text" name="name" required maxlength="80" value="${esc(user.name)}" autocomplete="name"></label>
     <label class="field"><span>Celular</span><input type="tel" name="phone" required maxlength="20" value="${esc(user.phone)}" autocomplete="tel"></label>
-    <label class="field"><span>Ciudad</span><input type="text" name="city" required maxlength="60" value="Lima" autocomplete="address-level2"></label>
+    <label class="field"><span>Ciudad</span><input type="text" name="city" required maxlength="60" value="Huánuco" autocomplete="address-level2"></label>
     <label class="field full"><span>Dirección</span><input type="text" name="address" required maxlength="160" placeholder="Av., calle, número, distrito" autocomplete="street-address"></label>
     <fieldset class="full pay-options" style="border:0; padding:0; margin:0">
       <legend class="field-label" style="margin-bottom: 8px">Método de pago</legend>

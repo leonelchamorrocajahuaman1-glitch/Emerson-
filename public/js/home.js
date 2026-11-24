@@ -60,10 +60,10 @@ updateCustom();
 
 // ---------- Beneficios y colección ----------
 qs('[data-perks]').innerHTML = [
-  [icons.truck, 'Envío gratis', 'En compras desde S/ 150 a todo el Perú'],
+  [icons.truck, 'Envío gratis', 'Desde S/ 150, de Huánuco a todo el Perú'],
   [icons.refresh, 'Cambios fáciles', 'Tienes 30 días para cambiar tu talla'],
   [icons.card, 'Paga como quieras', 'Yape, Plin, transferencia o contra entrega'],
-  [icons.shirt, 'Hecho en Perú', 'Algodón pima de la costa norte'],
+  [icons.shirt, 'Hecho en Huánuco', 'Confeccionado por talleres huanuqueños'],
 ]
   .map(([icon, title, text]) => `<div class="perk">${icon}<div><strong>${title}</strong><span>${text}</span></div></div>`)
   .join('');

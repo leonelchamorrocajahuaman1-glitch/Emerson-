@@ -87,29 +87,61 @@ CREATE TABLE IF NOT EXISTS images (
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
+CREATE TABLE IF NOT EXISTS settings (
+  key   TEXT PRIMARY KEY,
+  value TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS receipts (
+  id             INTEGER PRIMARY KEY,
+  order_id       INTEGER NOT NULL UNIQUE REFERENCES orders (id) ON DELETE CASCADE,
+  receipt_number TEXT NOT NULL UNIQUE,
+  series         TEXT NOT NULL DEFAULT 'B001',
+  correlative    INTEGER NOT NULL,
+  issue_date     TEXT NOT NULL DEFAULT (datetime('now')),
+  customer_name  TEXT NOT NULL,
+  customer_phone TEXT NOT NULL DEFAULT '',
+  customer_doc   TEXT NOT NULL DEFAULT '',
+  customer_city  TEXT NOT NULL DEFAULT '',
+  customer_address TEXT NOT NULL DEFAULT '',
+  payment_method TEXT NOT NULL,
+  subtotal       INTEGER NOT NULL,
+  shipping       INTEGER NOT NULL,
+  discount       INTEGER NOT NULL DEFAULT 0,
+  total          INTEGER NOT NULL,
+  print_status   TEXT NOT NULL DEFAULT 'pendiente' CHECK (print_status IN ('pendiente', 'impresa', 'fallida')),
+  print_attempts INTEGER NOT NULL DEFAULT 0,
+  printed_at     TEXT,
+  printer_name   TEXT NOT NULL DEFAULT '',
+  last_error     TEXT NOT NULL DEFAULT '',
+  created_at     TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
 CREATE INDEX IF NOT EXISTS idx_orders_user   ON orders (user_id);
 CREATE INDEX IF NOT EXISTS idx_orders_status ON orders (status);
 CREATE INDEX IF NOT EXISTS idx_items_order   ON order_items (order_id);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_receipts_order ON receipts (order_id);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_receipts_number ON receipts (receipt_number);
 `;
 
-const DEMO_CATEGORIES = ['Colección Lima 26', 'Oversize', 'Street', 'Básicos', 'Deportivo'];
+const DEMO_CATEGORIES = ['Colección Huánuco 26', 'Oversize', 'Street', 'Básicos', 'Deportivo'];
 
 // [nombre, categoría, precio S/, color, acento, diseño, destacado, stock S/M/L/XL, descripción]
 const DEMO_PRODUCTS = [
-  ['Polo Lima 26 Rojo Neón', 'Colección Lima 26', 79.9, '#a3111a', '#f4f4f4', 'franja', 1, [6, 12, 10, 4],
-    'La pieza central de la colección. Algodón pima peruano de 180 g, franja frontal contrastada y corte regular. Nacido en las calles de Lima.'],
-  ['Polo Lima 26 Negro', 'Colección Lima 26', 79.9, '#18181a', '#ff2a2a', 'lineas', 1, [8, 14, 12, 6],
-    'Negro profundo con líneas rojas que recorren los hombros. Ligero, transpirable y hecho para moverte toda la noche.'],
-  ['Polo Lima 26 Blanco', 'Colección Lima 26', 79.9, '#ececec', '#d0161f', 'lineas', 1, [5, 9, 7, 2],
+  ['Polo Huánuco 26 Rojo Neón', 'Colección Huánuco 26', 79.9, '#a3111a', '#f4f4f4', 'franja', 1, [6, 12, 10, 4],
+    'La pieza central de la colección. Algodón pima de 180 g, franja frontal contrastada y corte regular. Nacido en las calles de Huánuco.'],
+  ['Polo Huánuco 26 Negro', 'Colección Huánuco 26', 79.9, '#18181a', '#ff2a2a', 'lineas', 1, [8, 14, 12, 6],
+    'Negro profundo con líneas rojas en los hombros. Ligero y transpirable, hecho para el mejor clima del mundo.'],
+  ['Polo Huánuco 26 Blanco', 'Colección Huánuco 26', 79.9, '#ececec', '#d0161f', 'lineas', 1, [5, 9, 7, 2],
     'Blanco óptico con detalles rojos. El poder de crear: personalízalo con tu nombre y hazlo único.'],
-  ['Polo Oversize Asfalto', 'Oversize', 69.9, '#3a4146', '#ff3b30', 'liso', 0, [4, 10, 10, 8],
-    'Corte oversize con hombro caído en gris asfalto. Algodón peinado 200 g, cuello acanalado reforzado.'],
-  ['Polo Oversize Hueso', 'Oversize', 69.9, '#e6dfd2', '#1a1a1a', 'liso', 0, [3, 8, 9, 5],
-    'Tono hueso cálido, corte amplio y caída pesada. Un básico con actitud de calle.'],
-  ['Polo Street Azul Noche', 'Street', 59.9, '#16263f', '#ff5a1f', 'franja', 0, [7, 11, 9, 3],
-    'Azul noche con franja naranja fuego. Inspirado en las luces de la ciudad a las 3 a. m.'],
-  ['Polo Street Petróleo', 'Street', 59.9, '#1f3d3f', '#ff2a2a', 'lineas', 0, [2, 6, 5, 1],
-    'Verde petróleo con líneas rojas en hombros y mangas. Edición limitada.'],
+  ['Polo Oversize Calicanto', 'Oversize', 69.9, '#3a4146', '#ff3b30', 'liso', 0, [4, 10, 10, 8],
+    'Corte oversize con hombro caído en gris piedra, como el Puente Calicanto. Algodón peinado 200 g y atardecer andino en el pecho.'],
+  ['Polo Oversize Huallaga', 'Oversize', 69.9, '#e6dfd2', '#1a1a1a', 'liso', 0, [3, 8, 9, 5],
+    'Tono hueso cálido, corte amplio y caída pesada. Con el sello del río Huallaga en el pecho.'],
+  ['Polo Street Kotosh', 'Street', 59.9, '#16263f', '#ff5a1f', 'franja', 0, [7, 11, 9, 3],
+    'Azul noche con franja naranja fuego. Inspirado en el Templo de las Manos Cruzadas de Kotosh.'],
+  ['Polo Street Tingo María', 'Street', 59.9, '#1f3d3f', '#ff2a2a', 'lineas', 0, [2, 6, 5, 1],
+    'Verde selva con líneas rojas en hombros y mangas, en honor a la Bella Durmiente de Tingo María. Edición limitada.'],
   ['Polo Básico Negro', 'Básicos', 39.9, '#121214', '#3a3a3e', 'liso', 0, [20, 30, 25, 15],
     'El básico que nunca falla. Algodón 100 % peruano, costuras dobles y cuello que no se deforma.'],
   ['Polo Básico Blanco', 'Básicos', 39.9, '#f4f4f4', '#cfcfcf', 'liso', 0, [18, 25, 22, 12],
@@ -124,11 +156,11 @@ const DEMO_PRODUCTS = [
 
 // Estampado de cada polo de ejemplo (los que no aparecen van lisos).
 const DEMO_PRINTS = {
-  'Polo Lima 26 Negro': 'lima26',
-  'Polo Lima 26 Blanco': 'logo',
-  'Polo Oversize Asfalto': 'atardecer',
-  'Polo Oversize Hueso': 'ola',
-  'Polo Street Petróleo': 'logo',
+  'Polo Huánuco 26 Negro': 'lima26',
+  'Polo Huánuco 26 Blanco': 'logo',
+  'Polo Oversize Calicanto': 'atardecer',
+  'Polo Oversize Huallaga': 'ola',
+  'Polo Street Tingo María': 'logo',
 };
 
 // ---------- Acceso a datos ----------
@@ -199,7 +231,40 @@ class Database {
 }
 
 // Cambios de estructura para bases de datos creadas con versiones anteriores de la tienda.
+// Cambio de marca de POLOLAB (Lima) a EMR ORIGINAL (Huánuco): solo toca lo que siga con el texto original,
+// así no se pisan los cambios que el administrador haya hecho.
+const REBRAND_PRODUCTS = [
+  ['Polo Lima 26 Rojo Neón', 'Polo Huánuco 26 Rojo Neón', 'La pieza central de la colección. Algodón pima de 180 g, franja frontal contrastada y corte regular. Nacido en las calles de Huánuco.'],
+  ['Polo Lima 26 Negro', 'Polo Huánuco 26 Negro', 'Negro profundo con líneas rojas en los hombros. Ligero y transpirable, hecho para el mejor clima del mundo.'],
+  ['Polo Lima 26 Blanco', 'Polo Huánuco 26 Blanco', null],
+  ['Polo Oversize Asfalto', 'Polo Oversize Calicanto', 'Corte oversize con hombro caído en gris piedra, como el Puente Calicanto. Algodón peinado 200 g y atardecer andino en el pecho.'],
+  ['Polo Oversize Hueso', 'Polo Oversize Huallaga', 'Tono hueso cálido, corte amplio y caída pesada. Con el sello del río Huallaga en el pecho.'],
+  ['Polo Street Azul Noche', 'Polo Street Kotosh', 'Azul noche con franja naranja fuego. Inspirado en el Templo de las Manos Cruzadas de Kotosh.'],
+  ['Polo Street Petróleo', 'Polo Street Tingo María', 'Verde selva con líneas rojas en hombros y mangas, en honor a la Bella Durmiente de Tingo María. Edición limitada.'],
+];
+const REBRAND_SETTINGS = [
+  ['store_business_name', 'POLOLAB PERÚ S.A.C.', 'EMR ORIGINAL E.I.R.L.'],
+  ['store_address', 'Av. Larco 743, Miraflores, Lima', 'Jr. Dos de Mayo 1050, Huánuco'],
+  ['store_phone', '(01) 445-8920 / 992 481 029', '(062) 51-2840 / 992 481 029'],
+  ['central_source_name', 'POLOLAB', 'EMR ORIGINAL'],
+];
+
+async function rebrand(db) {
+  for (const [oldName, newName, description] of REBRAND_PRODUCTS) {
+    await db.run('UPDATE products SET name = ?, description = COALESCE(?, description) WHERE name = ?', newName, description, oldName);
+  }
+  await db.run("UPDATE categories SET name = 'Colección Huánuco 26' WHERE name = 'Colección Lima 26'");
+  await db.run("UPDATE users SET email = 'admin@emroriginal.pe' WHERE email = 'admin@pololab.pe'");
+  await db.run("UPDATE users SET email = 'cliente@emroriginal.pe' WHERE email = 'cliente@pololab.pe'");
+  if (await db.get("SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'settings'")) {
+    for (const [key, oldValue, newValue] of REBRAND_SETTINGS) {
+      await db.run('UPDATE settings SET value = ? WHERE key = ? AND value = ?', newValue, key, oldValue);
+    }
+  }
+}
+
 async function migrate(db) {
+  await rebrand(db);
   const hasColumn = async (table, column) =>
     Boolean(await db.get(`SELECT 1 FROM pragma_table_info('${table}') WHERE name = ?`, column));
   if (!(await hasColumn('products', 'print'))) {
@@ -211,6 +276,61 @@ async function migrate(db) {
   if (!(await hasColumn('order_items', 'print'))) {
     await db.run("ALTER TABLE order_items ADD COLUMN print TEXT NOT NULL DEFAULT 'ninguno'");
     await db.run('UPDATE order_items SET print = (SELECT print FROM products WHERE id = order_items.product_id) WHERE product_id IS NOT NULL');
+  }
+
+  const hasTable = async (table) =>
+    Boolean(await db.get("SELECT 1 FROM sqlite_master WHERE type='table' AND name = ?", table));
+  if (!(await hasTable('settings'))) {
+    await db.exec(`
+      CREATE TABLE IF NOT EXISTS settings (
+        key   TEXT PRIMARY KEY,
+        value TEXT NOT NULL
+      );
+    `);
+    const defaults = [
+      ['printer_name', ''],
+      ['printer_paper_width', '58mm'],
+      ['printer_auto_cut', '1'],
+      ['printer_auto_print', 'on_paid'],
+      ['store_business_name', 'EMR ORIGINAL E.I.R.L.'],
+      ['store_ruc', '20608974512'],
+      ['store_address', 'Jr. Dos de Mayo 1050, Huánuco'],
+      ['store_phone', '(062) 51-2840 / 992 481 029'],
+      ['receipt_series', 'B001'],
+    ];
+    for (const [k, v] of defaults) {
+      await db.run('INSERT OR IGNORE INTO settings (key, value) VALUES (?, ?)', k, v);
+    }
+  }
+  if (!(await hasTable('receipts'))) {
+    await db.exec(`
+      CREATE TABLE IF NOT EXISTS receipts (
+        id             INTEGER PRIMARY KEY,
+        order_id       INTEGER NOT NULL UNIQUE REFERENCES orders (id) ON DELETE CASCADE,
+        receipt_number TEXT NOT NULL UNIQUE,
+        series         TEXT NOT NULL DEFAULT 'B001',
+        correlative    INTEGER NOT NULL,
+        issue_date     TEXT NOT NULL DEFAULT (datetime('now')),
+        customer_name  TEXT NOT NULL,
+        customer_phone TEXT NOT NULL DEFAULT '',
+        customer_doc   TEXT NOT NULL DEFAULT '',
+        customer_city  TEXT NOT NULL DEFAULT '',
+        customer_address TEXT NOT NULL DEFAULT '',
+        payment_method TEXT NOT NULL,
+        subtotal       INTEGER NOT NULL,
+        shipping       INTEGER NOT NULL,
+        discount       INTEGER NOT NULL DEFAULT 0,
+        total          INTEGER NOT NULL,
+        print_status   TEXT NOT NULL DEFAULT 'pendiente' CHECK (print_status IN ('pendiente', 'impresa', 'fallida')),
+        print_attempts INTEGER NOT NULL DEFAULT 0,
+        printed_at     TEXT,
+        printer_name   TEXT NOT NULL DEFAULT '',
+        last_error     TEXT NOT NULL DEFAULT '',
+        created_at     TEXT NOT NULL DEFAULT (datetime('now'))
+      );
+      CREATE UNIQUE INDEX IF NOT EXISTS idx_receipts_order ON receipts (order_id);
+      CREATE UNIQUE INDEX IF NOT EXISTS idx_receipts_number ON receipts (receipt_number);
+    `);
   }
 }
 
@@ -257,7 +377,7 @@ const demoMode = () => !process.env.ADMIN_PASSWORD;
 async function seed(db) {
   if ((await db.get('SELECT COUNT(*) AS n FROM users')).n > 0) return;
 
-  const adminEmail = (process.env.ADMIN_EMAIL || 'admin@pololab.pe').trim().toLowerCase();
+  const adminEmail = (process.env.ADMIN_EMAIL || 'admin@emroriginal.pe').trim().toLowerCase();
   const adminPassword = process.env.ADMIN_PASSWORD || 'admin123';
   const sql = [['INSERT INTO users (id, name, email, password_hash, role, phone) VALUES (1, ?, ?, ?, ?, ?)',
     'Administrador', adminEmail, hashPassword(adminPassword), 'admin', '']];
@@ -276,14 +396,14 @@ async function seed(db) {
     // Cliente y pedidos de ejemplo solo en modo de prueba, para que el panel no empiece vacío.
     if (demoMode()) {
       sql.push(['INSERT INTO users (id, name, email, password_hash, role, phone) VALUES (2, ?, ?, ?, ?, ?)',
-        'Cliente Demo', 'cliente@pololab.pe', hashPassword('cliente123'), 'cliente', '987654321']);
+        'Cliente Demo', 'cliente@emroriginal.pe', hashPassword('cliente123'), 'cliente', '987654321']);
       const demoOrders = [
         { daysAgo: 6, status: 'entregado', lines: [[0, 'M', 1, ''], [7, 'L', 2, '']] },
         { daysAgo: 5, status: 'entregado', lines: [[2, 'S', 1, 'EMERSON']] },
         { daysAgo: 4, status: 'enviado', lines: [[1, 'L', 1, ''], [10, 'M', 1, '']] },
         { daysAgo: 3, status: 'cancelado', lines: [[5, 'XL', 1, '']] },
         { daysAgo: 2, status: 'pagado', lines: [[3, 'L', 2, ''], [8, 'M', 1, '']] },
-        { daysAgo: 1, status: 'pagado', lines: [[0, 'S', 1, 'LIMA'], [6, 'M', 1, '']] },
+        { daysAgo: 1, status: 'pagado', lines: [[0, 'S', 1, 'HUÁNUCO'], [6, 'M', 1, '']] },
         { daysAgo: 0, status: 'pendiente', lines: [[1, 'M', 1, '10']] },
       ];
       const payments = ['yape', 'transferencia', 'contraentrega'];
@@ -296,7 +416,7 @@ async function seed(db) {
         const when = `-${o.daysAgo * 24 + 3 + i} hours`;
         sql.push([`INSERT INTO orders (id, user_id, status, subtotal, shipping, total, ship_name, ship_phone, ship_address, ship_city,
                                        payment_method, created_at, updated_at)
-                   VALUES (?, 2, ?, ?, ?, ?, 'Cliente Demo', '987654321', 'Av. Arequipa 1234, Dpto. 502', 'Lima', ?,
+                   VALUES (?, 2, ?, ?, ?, ?, 'Cliente Demo', '987654321', 'Jr. Huallayco 845', 'Huánuco', ?,
                            datetime('now', ?), datetime('now', ?))`,
           i + 1, o.status, subtotal, shipping, subtotal + shipping, payments[i % 3], when, when]);
         for (const l of lines) {

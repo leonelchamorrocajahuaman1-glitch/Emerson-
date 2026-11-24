@@ -1,5 +1,5 @@
 @echo off
-title Tienda POLOLAB
+title Tienda EMR ORIGINAL
 cd /d "%~dp0"
 
 where node >/dev/null 2>nul

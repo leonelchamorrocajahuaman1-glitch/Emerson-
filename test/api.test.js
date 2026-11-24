@@ -9,16 +9,21 @@ let server;
 let base;
 const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'tienda-test-'));
 
+let appInstance;
 before(async () => {
-  const app = await createApp({ dataDir });
-  server = app.listen(0);
+  appInstance = await createApp({ dataDir });
+  server = appInstance.listen(0);
   await new Promise((resolve) => server.once('listening', resolve));
   base = `http://127.0.0.1:${server.address().port}`;
 });
 
-after(() => {
+after(async () => {
   server.close();
-  fs.rmSync(dataDir, { recursive: true, force: true });
+  if (appInstance?.locals?.db) appInstance.locals.db.close();
+  await new Promise((r) => setTimeout(r, 150));
+  try {
+    fs.rmSync(dataDir, { recursive: true, force: true });
+  } catch {}
 });
 
 // Cliente HTTP mínimo que guarda la cookie de sesión.
@@ -41,7 +46,7 @@ function client() {
   };
 }
 
-const shipping = { name: 'Ana Torres', phone: '999888777', address: 'Jr. Unión 456', city: 'Lima' };
+const shipping = { name: 'Ana Torres', phone: '999888777', address: 'Jr. Unión 456', city: 'Huánuco' };
 
 test('el catálogo público lista productos con stock por talla', async () => {
   const http = client();
@@ -83,7 +88,7 @@ test('un cliente se registra, compra y el stock se descuenta', async () => {
 
 test('no se puede comprar más que el stock disponible', async () => {
   const http = client();
-  await http('POST', '/api/auth/login', { email: 'cliente@pololab.pe', password: 'cliente123' });
+  await http('POST', '/api/auth/login', { email: 'cliente@emroriginal.pe', password: 'cliente123' });
   const product = (await http('GET', '/api/products/1')).data;
   const res = await http('POST', '/api/orders', {
     items: [
@@ -102,20 +107,20 @@ test('un cliente no puede entrar al panel de administración', async () => {
   const http = client();
   assert.equal((await http('GET', '/api/admin/stats')).status, 401);
   assert.equal((await http('GET', '/admin.html')).status, 302);
-  await http('POST', '/api/auth/login', { email: 'cliente@pololab.pe', password: 'cliente123' });
+  await http('POST', '/api/auth/login', { email: 'cliente@emroriginal.pe', password: 'cliente123' });
   assert.equal((await http('GET', '/api/admin/stats')).status, 403);
   assert.equal((await http('GET', '/admin.html')).status, 302);
 });
 
 test('credenciales incorrectas son rechazadas', async () => {
   const http = client();
-  const res = await http('POST', '/api/auth/login', { email: 'admin@pololab.pe', password: 'mala' });
+  const res = await http('POST', '/api/auth/login', { email: 'admin@emroriginal.pe', password: 'mala' });
   assert.equal(res.status, 401);
 });
 
 test('el administrador gestiona productos, categorías y pedidos', async () => {
   const admin = client();
-  const login = await admin('POST', '/api/auth/login', { email: 'admin@pololab.pe', password: 'admin123' });
+  const login = await admin('POST', '/api/auth/login', { email: 'admin@emroriginal.pe', password: 'admin123' });
   assert.equal(login.data.user.role, 'admin');
   assert.equal((await admin('GET', '/admin.html')).status, 200);
 
@@ -153,7 +158,7 @@ test('el administrador gestiona productos, categorías y pedidos', async () => {
 
   // Un cliente compra el producto nuevo y el admin lo despacha.
   const buyer = client();
-  await buyer('POST', '/api/auth/login', { email: 'cliente@pololab.pe', password: 'cliente123' });
+  await buyer('POST', '/api/auth/login', { email: 'cliente@emroriginal.pe', password: 'cliente123' });
   const order = await buyer('POST', '/api/orders', {
     items: [{ product_id: created.data.id, size: 'M', quantity: 2 }],
     shipping,
@@ -181,7 +186,7 @@ test('el administrador gestiona productos, categorías y pedidos', async () => {
 
 test('el administrador puede desactivar a un cliente', async () => {
   const admin = client();
-  await admin('POST', '/api/auth/login', { email: 'admin@pololab.pe', password: 'admin123' });
+  await admin('POST', '/api/auth/login', { email: 'admin@emroriginal.pe', password: 'admin123' });
   const user = client();
   await user('POST', '/api/auth/register', { name: 'Luis', email: 'luis@test.pe', password: 'secreta1' });
   const customers = (await admin('GET', '/api/admin/customers')).data;
@@ -196,7 +201,7 @@ test('rechaza peticiones que vienen de otro sitio', async () => {
   const res = await fetch(`${base}/api/auth/login`, {
     method: 'POST',
     headers: { 'content-type': 'application/json', origin: 'https://evil.example' },
-    body: JSON.stringify({ email: 'admin@pololab.pe', password: 'admin123' }),
+    body: JSON.stringify({ email: 'admin@emroriginal.pe', password: 'admin123' }),
   });
   assert.equal(res.status, 403);
 });
@@ -216,9 +221,9 @@ test('una base de datos anterior a los estampados se actualiza sin perder datos'
 
   const db = await openDb({ file, uploadsDir: uploads });
   assert.equal((await db.get('SELECT COUNT(*) AS n FROM products')).n, products);
-  assert.equal((await db.get("SELECT print FROM products WHERE name = 'Polo Lima 26 Negro'")).print, 'lima26');
+  assert.equal((await db.get("SELECT print FROM products WHERE name = 'Polo Huánuco 26 Negro'")).print, 'lima26');
   assert.equal((await db.get("SELECT print FROM products WHERE name = 'Polo Básico Negro'")).print, 'ninguno');
-  assert.equal((await db.get("SELECT print FROM order_items WHERE product_name = 'Polo Lima 26 Negro' LIMIT 1")).print, 'lima26');
+  assert.equal((await db.get("SELECT print FROM order_items WHERE product_name = 'Polo Huánuco 26 Negro' LIMIT 1")).print, 'lima26');
   const image = await db.get("SELECT mime, length(data) AS size FROM images WHERE name = 'abc123.png'");
   assert.deepEqual(image, { mime: 'image/png', size: 3 });
   db.close();
@@ -227,9 +232,9 @@ test('una base de datos anterior a los estampados se actualiza sin perder datos'
 test('demasiados intentos de contraseña bloquean el ingreso por un rato', async () => {
   const http = client();
   for (let i = 0; i < 8; i++) {
-    assert.equal((await http('POST', '/api/auth/login', { email: 'cliente@pololab.pe', password: 'mala' })).status, 401);
+    assert.equal((await http('POST', '/api/auth/login', { email: 'cliente@emroriginal.pe', password: 'mala' })).status, 401);
   }
-  const blocked = await http('POST', '/api/auth/login', { email: 'cliente@pololab.pe', password: 'cliente123' });
+  const blocked = await http('POST', '/api/auth/login', { email: 'cliente@emroriginal.pe', password: 'cliente123' });
   assert.equal(blocked.status, 429);
 });
 
@@ -247,16 +252,79 @@ test('con ADMIN_PASSWORD la tienda no crea ni muestra cuentas de prueba', async 
     const login = (email, password) => fetch(`${url}/api/auth/login`, {
       method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ email, password }),
     });
-    assert.equal((await login('admin@pololab.pe', 'admin123')).status, 401);
-    assert.equal((await login('cliente@pololab.pe', 'cliente123')).status, 401);
+    assert.equal((await login('admin@emroriginal.pe', 'admin123')).status, 401);
+    assert.equal((await login('cliente@emroriginal.pe', 'cliente123')).status, 401);
     assert.equal((await login('dueno@tienda.pe', 'clave-segura-123')).status, 200);
     const products = await (await fetch(`${url}/api/products`)).json();
     assert.ok(products.length > 0);
     srv.close();
     app.locals.db.close();
+    await new Promise((r) => setTimeout(r, 150));
   } finally {
     delete process.env.ADMIN_PASSWORD;
     delete process.env.ADMIN_EMAIL;
-    fs.rmSync(dir, { recursive: true, force: true });
+    try {
+      fs.rmSync(dir, { recursive: true, force: true });
+    } catch {}
   }
 });
+
+test('el sistema genera boletas únicas y no duplica compras ni números de boleta', async () => {
+  const admin = client();
+  await admin('POST', '/api/auth/login', { email: 'admin@emroriginal.pe', password: 'admin123' });
+
+  // 1. Obtener y configurar la impresora
+  const printerRes = await admin('GET', '/api/admin/printer');
+  assert.equal(printerRes.status, 200);
+  assert.ok(Array.isArray(printerRes.data.printers));
+
+  const updatePrinter = await admin('PUT', '/api/admin/printer', {
+    printer_paper_width: '58mm',
+    printer_auto_cut: '1',
+    printer_auto_print: 'on_paid',
+    store_business_name: 'EMR ORIGINAL E.I.R.L.',
+  });
+  assert.equal(updatePrinter.status, 200);
+  assert.equal(updatePrinter.data.printer_paper_width, '58mm');
+
+  // 2. Cliente realiza una compra
+  const customer = client();
+  await customer('POST', '/api/auth/register', { name: 'Carlos Díaz', email: 'carlos@test.pe', password: 'password123' });
+  const orderRes = await customer('POST', '/api/orders', {
+    items: [{ product_id: 1, size: 'M', quantity: 1, custom_text: 'CARLOS' }],
+    shipping,
+    payment_method: 'yape',
+  });
+  assert.equal(orderRes.status, 201);
+  const orderId = orderRes.data.id;
+
+  // 3. Como está en on_paid y el pedido aún es "pendiente", la boleta no se imprime prematuramente
+  const clientReceiptPending = await customer('GET', `/api/orders/${orderId}/receipt`);
+  assert.ok(clientReceiptPending.status === 404 || clientReceiptPending.data.print_status === 'pendiente');
+
+  // 4. Admin confirma el pago del pedido (status: 'pagado') -> se genera automáticamente la boleta única
+  const paidRes = await admin('PATCH', `/api/admin/orders/${orderId}`, { status: 'pagado' });
+  assert.equal(paidRes.status, 200);
+  assert.equal(paidRes.data.status, 'pagado');
+  assert.ok(paidRes.data.receipt);
+  const receiptNum = paidRes.data.receipt.receipt_number;
+  assert.match(receiptNum, /^B001-\d{8}$/);
+
+  // 5. Verificar idempotencia: volver a generar o consultar la boleta no debe crear un nuevo número ni duplicar
+  const genAgain = await admin('POST', `/api/admin/orders/${orderId}/receipt`, { print: false });
+  assert.equal(genAgain.status, 201);
+  assert.equal(genAgain.data.receipt_number, receiptNum);
+
+  // 6. Cliente puede consultar su boleta emitida con vista previa
+  const clientReceipt = await customer('GET', `/api/orders/${orderId}/receipt`);
+  assert.equal(clientReceipt.status, 200);
+  assert.equal(clientReceipt.data.receipt_number, receiptNum);
+  assert.ok(clientReceipt.data.preview_html.includes('BOLETA DE VENTA'));
+  assert.ok(clientReceipt.data.preview_html.includes(receiptNum));
+
+  // 7. Lista de boletas en el panel admin
+  const receiptsList = await admin('GET', '/api/admin/receipts');
+  assert.equal(receiptsList.status, 200);
+  assert.ok(receiptsList.data.some((r) => r.receipt_number === receiptNum));
+});
+

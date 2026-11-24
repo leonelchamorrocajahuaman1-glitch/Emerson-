@@ -1,4 +1,4 @@
-# POLOLAB · Tienda de polos
+# EMR ORIGINAL · Tienda de polos
 
 Tienda online de polos con estética cinematográfica: escenario oscuro, luces de neón, efectos *glitch* al hacer scroll y personalización del polo con tu nombre. Los polos se dibujan como maquetas realistas (pliegues, textura de algodón, cuello acanalado, costuras y estampados) con vista de frente y de espalda. Tiene dos sistemas:
 
@@ -41,8 +41,8 @@ Abre <http://localhost:3000>. La primera vez se crea la base de datos `data/tien
 
 | Rol | Correo | Contraseña |
 |---|---|---|
-| Administrador | `admin@pololab.pe` | `admin123` |
-| Cliente | `cliente@pololab.pe` | `cliente123` |
+| Administrador | `admin@emroriginal.pe` | `admin123` |
+| Cliente | `cliente@emroriginal.pe` | `cliente123` |
 
 En la página de ingreso hay botones para entrar con cada una. Estas cuentas existen solo en modo de prueba: cuando la tienda se publica con `ADMIN_PASSWORD`, no se crean ni se muestran.
 
@@ -59,7 +59,7 @@ En la página de ingreso hay botones para entrar con cada una. Estas cuentas exi
 
 ### Administrador
 - **Dashboard:** ventas totales, pedidos, ticket promedio, pedidos por atender, gráfico de ventas de los últimos 7 días, más vendidos, stock bajo y pedidos recientes.
-- **Productos:** crear, editar, ocultar y eliminar. Cada producto tiene precio, categoría, colores, diseño (liso, franja central o líneas en hombros), estampado en el pecho (logo, Lima 26 college, atardecer neón u ola del Pacífico), stock por talla y foto opcional. Si no sube foto, la tienda dibuja el polo con los colores y el estampado elegidos, con vista previa de frente y espalda.
+- **Productos:** crear, editar, ocultar y eliminar. Cada producto tiene precio, categoría, colores, diseño (liso, franja central o líneas en hombros), estampado en el pecho (logo EMR ORIGINAL, Huánuco 26 college, atardecer andino o río Huallaga), stock por talla y foto opcional. Si no sube foto, la tienda dibuja el polo con los colores y el estampado elegidos, con vista previa de frente y espalda.
 - **Pedidos:** filtrar por estado, buscar por número o cliente, ver el detalle y cambiar el estado. Al cancelar un pedido el stock vuelve al inventario.
 - **Categorías:** crear, renombrar y eliminar.
 - **Clientes:** ver cuánto ha comprado cada uno y bloquear o reactivar su acceso.
@@ -111,7 +111,7 @@ test/api.test.js       Pruebas de la API
 |---|---|---|
 | `PORT` | Puerto del servidor | `3000` |
 | `TURSO_DATABASE_URL` / `TURSO_AUTH_TOKEN` | Base de datos en internet (Turso). Sin ellas se usa `data/tienda.db` | — |
-| `ADMIN_EMAIL` / `ADMIN_PASSWORD` | Administrador que se crea la primera vez. Con `ADMIN_PASSWORD` la tienda sale del modo de prueba | `admin@pololab.pe` / `admin123` |
+| `ADMIN_EMAIL` / `ADMIN_PASSWORD` | Administrador que se crea la primera vez. Con `ADMIN_PASSWORD` la tienda sale del modo de prueba | `admin@emroriginal.pe` / `admin123` |
 | `SEED_DEMO` | Pon `0` para no crear productos de ejemplo | `1` |
 | `SESSION_SECRET` | Clave para firmar las sesiones (si no se define, se genera en `data/secret.key`) | generada |
 | `TRUST_PROXY` | Pon `1` cuando la tienda está detrás del proxy HTTPS del hosting | — |

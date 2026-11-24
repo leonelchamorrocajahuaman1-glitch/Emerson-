@@ -2,8 +2,8 @@
 # Render la lee al crear un "Blueprint" desde este repositorio. Guía paso a paso: docs/PUBLICAR.md
 services:
   - type: web
-    # Nombre del servicio ya publicado en Render: no lo cambies o se creará otro servicio.
-    name: pololab
+    # Tienda EMR ORIGINAL: el enlace será https://emr-original.onrender.com (si el nombre está libre).
+    name: emr-original
     runtime: node
     plan: free
     region: virginia
